@@ -236,7 +236,15 @@ export default function VectorMap({
 
     mapInstanceRef.current = map;
 
+    const handleResize = () => {
+      map.resize();
+    };
+    window.addEventListener("resize", handleResize);
+    const t = setTimeout(() => map.resize(), 150);
+
     return () => {
+      clearTimeout(t);
+      window.removeEventListener("resize", handleResize);
       map.remove();
       mapInstanceRef.current = null;
     };
@@ -614,14 +622,12 @@ export default function VectorMap({
 
   return (
     <div
-      className="relative w-full rounded-3xl overflow-hidden shadow-2xl border border-slate-800 bg-slate-950"
-      style={{ height: "650px", minHeight: "650px" }}
+      className="relative w-full h-full rounded-3xl overflow-hidden shadow-2xl border border-slate-800 bg-slate-950 flex flex-col"
     >
       {/* Harita Konteyneri */}
       <div
         ref={mapContainerRef}
-        style={{ width: "100%", height: "100%", minHeight: "650px" }}
-        className="z-0"
+        className="w-full h-full flex-1 z-0"
       />
 
       {/* Üst Sağ Harita Kontrolleri (Zorluk/Katman Ayarları & Ses) */}

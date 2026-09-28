@@ -18,8 +18,11 @@ export const metadata: Metadata = {
   title: "GeoTürkiye - Gerçek Harita ile Coğrafya Test ve Öğrenme Platformu",
   description: "KPSS, YKS ve coğrafya meraklıları için gerçek Türkiye haritası üzerinde göller, dağlar, akarsular ve körleme koordinat bulma test platformu.",
   icons: {
-    icon: "/favicon.png",
-    apple: "/apple-icon.png",
+    icon: [
+      { url: "/logo.png?v=2", type: "image/png" },
+    ],
+    shortcut: "/logo.png?v=2",
+    apple: "/logo.png?v=2",
   },
 };
 
