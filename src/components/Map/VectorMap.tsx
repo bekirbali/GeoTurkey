@@ -593,6 +593,36 @@ export default function VectorMap({
 
         activeMarkersRef.current.push(marker);
       });
+    } else if (mode === "reverse") {
+      // Ters Mod: Haritada hedef nokta parıldayan soru işareti piniyle gösterilir
+      if (currentItem) {
+        const el = document.createElement("div");
+        el.innerHTML = `
+          <div style="position:relative; display:flex; flex-direction:column; align-items:center;">
+            <span style="position:absolute; width:48px; height:48px; border-radius:9999px; background:rgba(168,85,247,0.4);" class="animate-ping"></span>
+            <div style="width:36px; height:36px; border-radius:9999px; background:linear-gradient(135deg, #9333ea, #4f46e5); border:3px solid white; box-shadow:0 0 20px rgba(147,51,234,0.7); display:flex; align-items:center; justify-content:center; color:white; font-size:18px; font-weight:900; z-index:10;">
+              ?
+            </div>
+            <div style="width:4px; height:8px; background:white; border-radius:2px; margin-top:-2px; box-shadow:0 2px 4px rgba(0,0,0,0.3);"></div>
+          </div>
+        `;
+
+        const marker = new maplibregl.Marker({
+          element: el,
+          anchor: "bottom",
+        })
+          .setLngLat([currentItem.coordinates.lng, currentItem.coordinates.lat])
+          .addTo(map);
+
+        activeMarkersRef.current.push(marker);
+
+        // Hedefe yumuşakça odaklan
+        map.flyTo({
+          center: [currentItem.coordinates.lng, currentItem.coordinates.lat],
+          zoom: Math.max(map.getZoom(), 6.8),
+          duration: 900,
+        });
+      }
     }
   }, [
     mode,

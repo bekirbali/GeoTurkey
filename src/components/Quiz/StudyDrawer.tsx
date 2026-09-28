@@ -2,35 +2,53 @@
 
 import React from "react";
 import { GeoItem } from "@/types/geography";
-import { X, Award, MapPin, Compass, Info, Sparkles } from "lucide-react";
+import { X, Award, MapPin, Compass, Info, Sparkles, Star } from "lucide-react";
 
 interface StudyDrawerProps {
   item: GeoItem | null;
   onClose: () => void;
   onStartQuizOnItem?: (item: GeoItem) => void;
+  isFavorite?: boolean;
+  onToggleFavorite?: (item: GeoItem) => void;
 }
 
 export default function StudyDrawer({
   item,
   onClose,
   onStartQuizOnItem,
+  isFavorite = false,
+  onToggleFavorite,
 }: StudyDrawerProps) {
   if (!item) return null;
 
   return (
     <div className="fixed inset-y-0 right-0 w-full max-w-md bg-slate-900/95 backdrop-blur-2xl border-l border-slate-700/80 shadow-2xl z-40 p-6 flex flex-col justify-between overflow-y-auto animate-in slide-in-from-right duration-300">
       <div>
-        {/* Üst Kapatma & Kategori Başlığı */}
+        {/* Üst Kapatma & Kategori Başlığı & Favori */}
         <div className="flex items-center justify-between gap-3 mb-4">
           <span className="px-3 py-1 rounded-full text-xs font-bold bg-cyan-500/15 text-cyan-400 border border-cyan-500/30">
             {item.subCategoryTitle}
           </span>
-          <button
-            onClick={onClose}
-            className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
-          >
-            <X size={20} />
-          </button>
+          <div className="flex items-center gap-1.5">
+            {onToggleFavorite && (
+              <button
+                onClick={() => onToggleFavorite(item)}
+                title={isFavorite ? "Yıldızlılardan Çıkar" : "Yıldızla / Zorlandıklarıma Ekle"}
+                className="p-2 rounded-xl text-slate-400 hover:text-amber-400 hover:bg-slate-800 transition-colors"
+              >
+                <Star
+                  size={18}
+                  className={isFavorite ? "fill-amber-400 text-amber-400" : ""}
+                />
+              </button>
+            )}
+            <button
+              onClick={onClose}
+              className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            >
+              <X size={20} />
+            </button>
+          </div>
         </div>
 
         {/* Başlık ve Temel Lokasyon */}

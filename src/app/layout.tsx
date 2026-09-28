@@ -16,7 +16,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "GeoTürkiye - Gerçek Harita ile Coğrafya Test ve Öğrenme Platformu",
-  description: "KPSS, YKS ve coğrafya meraklıları için gerçek Türkiye haritası üzerinde göller, dağlar, akarsular ve körleme koordinat bulma test platformu.",
+  description: "KPSS, YKS ve coğrafya meraklıları için gerçek Türkiye haritası üzerinde göller, dağlar, akarsular, madenler, tarım ve körleme koordinat bulma test platformu.",
+  manifest: "/manifest.json",
   icons: {
     icon: [
       { url: "/logo.svg?v=3", type: "image/svg+xml" },
@@ -30,7 +31,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
-      lang="en"
+      lang="tr"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>

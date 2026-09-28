@@ -1,4 +1,13 @@
-export type GeoCategoryType = "lakes" | "mountains" | "rivers" | "dams" | "mines" | "agriculture" | "plateaus_plains";
+export type GeoCategoryType = 
+  | "lakes" 
+  | "mountains" 
+  | "rivers" 
+  | "dams" 
+  | "mines" 
+  | "agriculture" 
+  | "plains_plateaus" 
+  | "gulfs_straits" 
+  | "national_parks";
 
 export type QuizMode = "study" | "pinpoint" | "blind" | "reverse";
 

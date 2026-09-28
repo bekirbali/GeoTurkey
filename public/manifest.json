@@ -1,0 +1,21 @@
+{
+  "name": "GeoTürkiye - Gerçek Harita ile Coğrafya Platformu",
+  "short_name": "GeoTürkiye",
+  "description": "KPSS, YKS ve Coğrafya meraklıları için interaktif gerçek harita test ve öğrenme platformu",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#020617",
+  "theme_color": "#020617",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

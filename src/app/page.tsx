@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import { GeoCategoryType, QuizMode, GeoItem, GuessResult } from "@/types/geography";
 import { GEO_ITEMS } from "@/data/geoItems";
 import { CATEGORIES } from "@/data/categories";
+import { soundEffects } from "@/lib/geoUtils";
 import QuizHeader from "@/components/Quiz/QuizHeader";
 import QuestionCard from "@/components/Quiz/QuestionCard";
 import StudyDrawer from "@/components/Quiz/StudyDrawer";
@@ -28,6 +29,35 @@ export default function HomePage() {
   const [selectedSubCategoryId, setSelectedSubCategoryId] = useState<string>("all_lakes");
   const [mode, setMode] = useState<QuizMode>("study");
 
+  // Favoriler (Zorlanılan Sorular) State'i
+  const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
+  const [isFavoritesOnly, setIsFavoritesOnly] = useState<boolean>(false);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("geoturkiye_favorites");
+      if (saved) {
+        setFavoriteIds(JSON.parse(saved));
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }, []);
+
+  const handleToggleFavorite = (targetItem: GeoItem) => {
+    setFavoriteIds((prev) => {
+      const next = prev.includes(targetItem.id)
+        ? prev.filter((id) => id !== targetItem.id)
+        : [...prev, targetItem.id];
+      try {
+        localStorage.setItem("geoturkiye_favorites", JSON.stringify(next));
+      } catch (e) {
+        console.error(e);
+      }
+      return next;
+    });
+  };
+
   // Çalışma Modunda Seçili Öğe (Drawer Açmak İçin)
   const [activeStudyItem, setActiveStudyItem] = useState<GeoItem | null>(null);
 
@@ -48,6 +78,9 @@ export default function HomePage() {
     attemptsUsed?: number;
   } | null>(null);
 
+  // Ters Mod Seçilen Şık ID'si
+  const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null);
+
   // Çoklu Hak ve Kademeli Puanlama State'leri
   const MAX_ATTEMPTS = 3;
   const [currentAttempt, setCurrentAttempt] = useState<number>(1);
@@ -57,6 +90,7 @@ export default function HomePage() {
   // Filtrelenmiş Öğeler
   const filteredItems = useMemo(() => {
     return GEO_ITEMS.filter((item) => {
+      if (isFavoritesOnly && !favoriteIds.includes(item.id)) return false;
       if (item.category !== selectedCategory) return false;
       if (
         selectedSubCategoryId.startsWith("all_") ||
@@ -66,7 +100,7 @@ export default function HomePage() {
       }
       return item.subCategoryId === selectedSubCategoryId;
     });
-  }, [selectedCategory, selectedSubCategoryId]);
+  }, [selectedCategory, selectedSubCategoryId, isFavoritesOnly, favoriteIds]);
 
   // Yeni Bir Test Başlatma Fonksiyonu
   const startNewQuiz = (newItems = filteredItems) => {
@@ -78,6 +112,7 @@ export default function HomePage() {
     setMaxStreak(0);
     setAllowGuess(true);
     setCurrentAttempt(1);
+    setSelectedOptionId(null);
     setWrongItemIds([]);
     setAttemptFeedback(null);
     setResults([]);
@@ -97,6 +132,45 @@ export default function HomePage() {
   };
 
   const currentQuestionItem = quizItems[currentIndex] || filteredItems[0];
+
+  // Ters Mod: 4 Şık Üretimi (1 doğru + 3 aynı kategoriden çeldirici)
+  const reverseOptions = useMemo(() => {
+    if (mode !== "reverse" || !currentQuestionItem) return [];
+    const pool = GEO_ITEMS.filter(
+      (it) => it.id !== currentQuestionItem.id && it.category === currentQuestionItem.category
+    );
+    const shuffledPool = [...pool].sort(() => Math.random() - 0.5);
+    const distractors = shuffledPool.slice(0, 3);
+    return [currentQuestionItem, ...distractors].sort(() => Math.random() - 0.5);
+  }, [mode, currentQuestionItem]);
+
+  // Ters Mod Şık Tıklaması
+  const handleSelectOption = (option: GeoItem) => {
+    if (!allowGuess || !currentQuestionItem) return;
+    setSelectedOptionId(option.id);
+    const isCorrect = option.id === currentQuestionItem.id;
+    if (isCorrect) {
+      soundEffects.playSuccess();
+      handleGuessComplete({
+        item: currentQuestionItem,
+        distanceKm: 0,
+        score: 1000,
+        isCorrect: true,
+        accuracyLabel: "Doğru Seçenek! (+1000 P)",
+        attemptsUsed: 1,
+      });
+    } else {
+      soundEffects.playMiss();
+      handleGuessComplete({
+        item: currentQuestionItem,
+        distanceKm: 0,
+        score: 0,
+        isCorrect: false,
+        accuracyLabel: `Yanlış! Doğru cevap: ${currentQuestionItem.name}`,
+        attemptsUsed: 1,
+      });
+    }
+  };
 
   // Yanlış Deneme Olduğunda (Hala hakkı varsa)
   const handleWrongAttempt = (info: {
@@ -160,6 +234,7 @@ export default function HomePage() {
       setCurrentIndex((prev) => prev + 1);
       setAllowGuess(true);
       setCurrentAttempt(1);
+      setSelectedOptionId(null);
       setWrongItemIds([]);
       setAttemptFeedback(null);
       setLastGuessResult(null);
@@ -186,6 +261,9 @@ export default function HomePage() {
         streak={streak}
         questionNumber={currentIndex + 1}
         totalQuestions={quizItems.length}
+        isFavoritesOnly={isFavoritesOnly}
+        onToggleFavoritesOnly={() => setIsFavoritesOnly((prev) => !prev)}
+        favoritesCount={favoriteIds.length}
       />
 
       {/* Ana Çalışma Alanı (Harita & Kartlar) */}
@@ -196,6 +274,11 @@ export default function HomePage() {
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
             <span className="text-slate-400 font-medium">Toplam Konum:</span>
             <strong className="text-white font-bold">{filteredItems.length} Adet</strong>
+            {isFavoritesOnly && (
+              <span className="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold">
+                ⭐ Yıldızlı Filtresi Aktif
+              </span>
+            )}
           </div>
 
           <div className="flex items-center gap-2">
@@ -204,6 +287,7 @@ export default function HomePage() {
               {mode === "study" && "🎓 Keşfet & İncele"}
               {mode === "pinpoint" && "📍 İşaretçi Bulma (3 Hak)"}
               {mode === "blind" && "🎯 Körleme Koordinat Tahmini (3 Hak)"}
+              {mode === "reverse" && "⚡ Ters Mod (4 Şıklı Çoktan Seçmeli)"}
             </span>
           </div>
         </div>
@@ -226,7 +310,13 @@ export default function HomePage() {
 
           {/* Test Modundayken Harita Üzerine Binen Yüzen Soru Kartı */}
           {mode !== "study" && currentQuestionItem && (
-            <div className="absolute top-4 left-4 z-20 max-w-[340px] md:max-w-md pointer-events-auto">
+            <div
+              className={`absolute z-20 pointer-events-auto transition-all duration-200 ${
+                mode === "reverse"
+                  ? "bottom-2 left-2 right-2 md:bottom-auto md:top-4 md:left-4 md:right-auto md:max-w-md"
+                  : "top-2 left-2 right-2 md:top-4 md:left-4 md:right-auto md:max-w-md"
+              }`}
+            >
               <QuestionCard
                 item={currentQuestionItem}
                 mode={mode}
@@ -236,6 +326,11 @@ export default function HomePage() {
                 attemptFeedback={attemptFeedback}
                 lastGuessResult={lastGuessResult}
                 onNextQuestion={handleNextQuestion}
+                options={reverseOptions}
+                onSelectOption={handleSelectOption}
+                selectedOptionId={selectedOptionId}
+                isFavorite={favoriteIds.includes(currentQuestionItem.id)}
+                onToggleFavorite={() => handleToggleFavorite(currentQuestionItem)}
               />
             </div>
           )}
@@ -246,12 +341,15 @@ export default function HomePage() {
       <StudyDrawer
         item={activeStudyItem}
         onClose={() => setActiveStudyItem(null)}
+        isFavorite={activeStudyItem ? favoriteIds.includes(activeStudyItem.id) : false}
+        onToggleFavorite={handleToggleFavorite}
         onStartQuizOnItem={(item) => {
           setMode("blind");
           setQuizItems([item]);
           setCurrentIndex(0);
           setAllowGuess(true);
           setCurrentAttempt(1);
+          setSelectedOptionId(null);
           setWrongItemIds([]);
           setAttemptFeedback(null);
           setLastGuessResult(null);
