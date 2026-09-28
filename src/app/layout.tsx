@@ -19,10 +19,11 @@ export const metadata: Metadata = {
   description: "KPSS, YKS ve coğrafya meraklıları için gerçek Türkiye haritası üzerinde göller, dağlar, akarsular ve körleme koordinat bulma test platformu.",
   icons: {
     icon: [
+      { url: "/logo.svg?v=3", type: "image/svg+xml" },
       { url: "/logo.png?v=2", type: "image/png" },
     ],
-    shortcut: "/logo.png?v=2",
-    apple: "/logo.png?v=2",
+    shortcut: "/logo.svg?v=3",
+    apple: "/logo.svg?v=3",
   },
 };
 

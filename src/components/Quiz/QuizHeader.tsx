@@ -39,12 +39,8 @@ export default function QuizHeader({
         {/* Sol Taraf: Logo & Kategori Seçimi */}
         <div className="flex flex-wrap items-center gap-3 w-full md:w-auto justify-between md:justify-start">
           <div className="flex items-center gap-2.5">
-            <div className="relative w-11 h-11 rounded-2xl overflow-hidden shadow-lg shadow-cyan-500/25 border border-cyan-500/30 flex items-center justify-center bg-slate-900 group">
-              <img
-                src="/logo.png"
-                alt="GeoTürkiye Logo"
-                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-              />
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-cyan-600 via-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-cyan-500/25">
+              <Compass className="w-5 h-5 text-white animate-spin-slow" />
             </div>
             <div>
               <div className="flex items-center gap-1.5">
