@@ -1,4 +1,4 @@
-export type GeoCategoryType = "lakes" | "mountains" | "rivers" | "plateaus_plains";
+export type GeoCategoryType = "lakes" | "mountains" | "rivers" | "dams" | "mines" | "agriculture" | "plateaus_plains";
 
 export type QuizMode = "study" | "pinpoint" | "blind" | "reverse";
 
@@ -32,7 +32,9 @@ export interface GeoItem {
     depth?: string;
     area?: string;
     waterType?: string; // Tatlı, Acı, Sodalı, Tuzlu
-    formation?: string; // Oluşum detayı
+    formation?: string; // Oluşum detayı / Rezerv / Havza
+    usage?: string;     // Sanayi / Kullanım alanı
+    ranking?: string;   // Türkiye veya Dünya sırası / Payı
   };
 }
 
@@ -47,6 +49,7 @@ export interface SubCategory {
 export interface CategoryInfo {
   id: GeoCategoryType;
   title: string;
+  tabLabel?: string;
   shortDesc: string;
   iconName: string;
   gradient: string;

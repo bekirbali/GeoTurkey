@@ -58,7 +58,7 @@ export default function QuizHeader({
           </div>
 
           {/* Kategori Seçim Butonları */}
-          <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-slate-950/60 border border-slate-800">
+          <div className="flex items-center gap-1 p-1 rounded-2xl bg-slate-950/60 border border-slate-800 overflow-x-auto scrollbar-none">
             {CATEGORIES.map((cat) => (
               <button
                 key={cat.id}
@@ -66,13 +66,13 @@ export default function QuizHeader({
                   onSelectCategory(cat.id);
                   onSelectSubCategory(cat.subCategories[0].id);
                 }}
-                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                className={`px-2.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
                   selectedCategory === cat.id
                     ? "bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-md shadow-blue-500/25"
                     : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"
                 }`}
               >
-                {cat.title.replace("Türkiye'nin ", "")}
+                {cat.tabLabel || cat.title.replace("Türkiye'nin ", "")}
               </button>
             ))}
           </div>

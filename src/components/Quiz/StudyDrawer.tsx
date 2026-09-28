@@ -105,8 +105,20 @@ export default function StudyDrawer({
               )}
               {item.details.formation && (
                 <div className="col-span-2 p-2.5 rounded-xl bg-slate-800/60 border border-slate-700/60">
-                  <span className="text-slate-400 block text-[10px]">Oluşum Şekli</span>
+                  <span className="text-slate-400 block text-[10px]">Oluşum Şekli / Rezerv</span>
                   <strong className="text-slate-200">{item.details.formation}</strong>
+                </div>
+              )}
+              {item.details.usage && (
+                <div className="col-span-2 p-2.5 rounded-xl bg-slate-800/60 border border-slate-700/60">
+                  <span className="text-slate-400 block text-[10px]">Kullanım / Sanayi Alanı</span>
+                  <strong className="text-cyan-300">{item.details.usage}</strong>
+                </div>
+              )}
+              {item.details.ranking && (
+                <div className="col-span-2 p-2.5 rounded-xl bg-slate-800/60 border border-slate-700/60">
+                  <span className="text-slate-400 block text-[10px]">Türkiye / Dünya Sıralaması</span>
+                  <strong className="text-amber-300">{item.details.ranking}</strong>
                 </div>
               )}
             </div>
