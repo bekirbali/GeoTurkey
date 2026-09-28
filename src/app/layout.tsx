@@ -17,6 +17,10 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "GeoTürkiye - Gerçek Harita ile Coğrafya Test ve Öğrenme Platformu",
   description: "KPSS, YKS ve coğrafya meraklıları için gerçek Türkiye haritası üzerinde göller, dağlar, akarsular ve körleme koordinat bulma test platformu.",
+  icons: {
+    icon: "/favicon.png",
+    apple: "/apple-icon.png",
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
