@@ -200,6 +200,13 @@ export const CATEGORIES: CategoryInfo[] = [
         description: "Oymapınar, Menzelet, Aslantaş, Demirköprü, Kemer barajları",
         badgeColor: "bg-emerald-600 text-white",
       },
+      {
+        id: "yesilirmak_dams",
+        title: "Yeşilırmak",
+        categoryId: "dams",
+        description: "Hasan Uğurlu, Suat Uğurlu, Almus ve Kılıçkaya barajları",
+        badgeColor: "bg-lime-600 text-white",
+      },
     ],
   },
   {
@@ -359,6 +366,20 @@ export const CATEGORIES: CategoryInfo[] = [
         description: "İstanbul Boğazı ve Çanakkale Boğazı (Karadeniz'i Akdeniz'e bağlayan suyolları)",
         badgeColor: "bg-sky-600 text-white",
       },
+      {
+        id: "passes",
+        title: "Geçitler",
+        categoryId: "gulfs_straits",
+        description: "Zigana, Kop, Gülek, Sertavul, Çubuk ve Belen geçitleri",
+        badgeColor: "bg-amber-600 text-white",
+      },
+      {
+        id: "border_gates",
+        title: "Sınır Kapıları",
+        categoryId: "gulfs_straits",
+        description: "Kapıkule, İpsala, Sarp, Gürbulak, Habur ve diğer gümrük kapıları",
+        badgeColor: "bg-emerald-600 text-white",
+      },
     ],
   },
   {
@@ -396,6 +417,13 @@ export const CATEGORIES: CategoryInfo[] = [
         categoryId: "national_parks",
         description: "Yozgat Çamlığı (İlk Milli Park), Munzur Vadisi, Spil Dağı, Beyşehir Gölü...",
         badgeColor: "bg-lime-600 text-white",
+      },
+      {
+        id: "unesco_heritage",
+        title: "UNESCO Mirası",
+        categoryId: "national_parks",
+        description: "Pamukkale, Çatalhöyük, Safranbolu, Hattuşaş, Divriği, Efes, Truva, Nemrut...",
+        badgeColor: "bg-amber-600 text-white",
       },
     ],
   },
