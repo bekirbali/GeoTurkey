@@ -87,6 +87,9 @@ export default function HomePage() {
   const [wrongItemIds, setWrongItemIds] = useState<string[]>([]);
   const [attemptFeedback, setAttemptFeedback] = useState<string | null>(null);
 
+  // Harita Katman & Zorluk Modalı State'i (QuestionCard'dan da açılabilmesi için)
+  const [isMapSettingsOpen, setIsMapSettingsOpen] = useState<boolean>(false);
+
   // Filtrelenmiş Öğeler
   const filteredItems = useMemo(() => {
     return GEO_ITEMS.filter((item) => {
@@ -267,9 +270,9 @@ export default function HomePage() {
       />
 
       {/* Ana Çalışma Alanı (Harita & Kartlar) */}
-      <main className="flex-1 relative flex flex-col px-3 pb-3 pt-2 md:px-6 md:pb-4 md:pt-2 max-w-7xl mx-auto w-full min-h-0">
-        {/* Mod Bilgilendirme Rozeti (Üst Bildirim) */}
-        <div className="flex flex-wrap items-center justify-between gap-3 mb-2 px-1 shrink-0">
+      <main className="flex-1 relative flex flex-col px-1.5 pb-1.5 pt-1 sm:px-4 sm:pb-3 sm:pt-2 md:px-6 md:pb-4 md:pt-2 max-w-7xl mx-auto w-full min-h-0">
+        {/* Mod Bilgilendirme Rozeti (Üst Bildirim - Mobilde ekranı daraltmaması için gizlendi, masaüstünde gösterilir) */}
+        <div className="hidden md:flex flex-wrap items-center justify-between gap-3 mb-2 px-1 shrink-0">
           <div className="flex items-center gap-2 text-xs">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
             <span className="text-slate-400 font-medium">Toplam Konum:</span>
@@ -293,7 +296,7 @@ export default function HomePage() {
         </div>
 
         {/* Harita ve Üzerine Binen Yüzen Soru Paneli */}
-        <div className="relative flex-1 w-full h-full min-h-0 rounded-3xl overflow-hidden shadow-2xl border border-slate-800">
+        <div className="relative flex-1 w-full h-full min-h-0 rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border border-slate-800">
           {/* Gerçek Türkiye Haritası */}
           <VectorMap
             mode={mode}
@@ -306,6 +309,8 @@ export default function HomePage() {
             currentAttempt={currentAttempt}
             maxAttempts={MAX_ATTEMPTS}
             wrongItemIds={wrongItemIds}
+            isSettingsOpen={isMapSettingsOpen}
+            onToggleSettings={setIsMapSettingsOpen}
           />
 
           {/* Test Modundayken Harita Üzerine Binen Yüzen Soru Kartı */}
@@ -331,6 +336,7 @@ export default function HomePage() {
                 selectedOptionId={selectedOptionId}
                 isFavorite={favoriteIds.includes(currentQuestionItem.id)}
                 onToggleFavorite={() => handleToggleFavorite(currentQuestionItem)}
+                onOpenSettings={() => setIsMapSettingsOpen(true)}
               />
             </div>
           )}

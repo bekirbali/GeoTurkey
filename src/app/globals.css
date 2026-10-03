@@ -105,6 +105,17 @@ body {
   filter: invert(0.8) !important;
 }
 
+/* Körleme Modu Çizgi Mesafesi Popup Sadeleştirmesi */
+.guess-distance-popup .maplibregl-popup-content {
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+}
+.guess-distance-popup .maplibregl-popup-tip {
+  display: none !important;
+}
+
 /* Custom Marker Pulsing Keyframes */
 @keyframes pulse-ring {
   0% {

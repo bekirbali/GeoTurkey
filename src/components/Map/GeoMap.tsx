@@ -191,45 +191,68 @@ export default function GeoMap({
       if (tempDrawingsLayerRef.current) {
         tempDrawingsLayerRef.current.clearLayers();
 
-        // 1. Kullanıcının Tıkladığı Nokta İkonu (Mavi Daire)
+        // 1. Kullanıcının Tıkladığı Nokta İkonu (Mavi Klasik İğne / Pin + Nişangah)
         const userClickIcon = L.divIcon({
           className: "custom-click-icon",
           html: `
-            <div style="position:relative; display:flex; flex-direction:column; align-items:center;">
-              <span style="padding:2px 6px; font-size:10px; font-weight:bold; border-radius:6px; color:white; background:#3b82f6; box-shadow:0 2px 4px rgba(0,0,0,0.3); white-space:nowrap; margin-bottom:2px;">
-                Tahminin
-              </span>
-              <div style="position:relative; display:flex; align-items:center; justify-content:center;">
-                <span style="position:absolute; width:28px; height:28px; border-radius:9999px; background:rgba(59,130,246,0.35);" class="animate-ping"></span>
-                <span style="position:relative; width:14px; height:14px; border-radius:9999px; background:#2563eb; border:2px solid white; box-shadow:0 2px 6px rgba(0,0,0,0.4);"></span>
+            <div style="position:relative; display:flex; flex-direction:column; align-items:center; cursor:default; user-select:none; z-index:20;">
+              <div style="display:inline-flex; align-items:center; gap:4px; padding:2.5px 8px; font-size:11px; font-weight:700; border-radius:9999px; color:#ffffff; background:linear-gradient(135deg, #1d4ed8, #2563eb); border:1.5px solid #93c5fd; box-shadow:0 3px 8px rgba(37,99,235,0.45); white-space:nowrap; margin-bottom:3px; text-shadow:0 1px 2px rgba(0,0,0,0.3);">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="22" y1="12" x2="18" y2="12"/>
+                  <line x1="6" y1="12" x2="2" y2="12"/>
+                  <line x1="12" y1="6" x2="12" y2="2"/>
+                  <line x1="12" y1="22" x2="12" y2="18"/>
+                </svg>
+                <span>Senin Tahminin</span>
+              </div>
+              <div style="position:relative; width:30px; height:38px; display:flex; align-items:center; justify-content:center;">
+                <span style="position:absolute; bottom:-4px; left:50%; transform:translateX(-50%); width:20px; height:20px; border-radius:9999px; background:rgba(37,99,235,0.45);" class="animate-ping"></span>
+                <svg width="30" height="38" viewBox="0 0 30 38" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 4px 6px rgba(0,0,0,0.45));">
+                  <path d="M15 1C7.268 1 1 7.268 1 15C1 25.5 15 37 15 37C15 37 29 25.5 29 15C29 7.268 22.732 1 15 1Z" fill="#2563eb" stroke="#ffffff" stroke-width="2"/>
+                  <circle cx="15" cy="15" r="5.5" fill="#ffffff"/>
+                  <circle cx="15" cy="15" r="3" fill="#1d4ed8"/>
+                  <line x1="15" y1="5.5" x2="15" y2="8" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/>
+                  <line x1="15" y1="22" x2="15" y2="24.5" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/>
+                  <line x1="5.5" y1="15" x2="8" y2="15" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/>
+                  <line x1="22" y1="15" x2="24.5" y2="15" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
               </div>
             </div>
           `,
-          iconSize: [80, 40],
-          iconAnchor: [40, 32],
+          iconSize: [120, 65],
+          iconAnchor: [60, 65],
         });
 
         L.marker([clickedLat, clickedLng], { icon: userClickIcon }).addTo(
           tempDrawingsLayerRef.current
         );
 
-        // 2. Orijinal Hedef Noktası (Yeşil / Turuncu Parlayan İkon)
+        // 2. Orijinal Hedef Noktası (Zümrüt Yeşili Hedef Tahtası & Radar Rozeti)
         const targetColor = evaluation.score >= 600 ? "#10b981" : evaluation.score >= 300 ? "#f59e0b" : "#ef4444";
         const targetIcon = L.divIcon({
           className: "custom-target-icon",
           html: `
-            <div style="position:relative; display:flex; flex-direction:column; align-items:center;">
-              <span style="padding:3px 8px; font-size:11px; font-weight:800; border-radius:8px; color:white; background:${targetColor}; box-shadow:0 4px 8px rgba(0,0,0,0.4); white-space:nowrap; border:1px solid rgba(255,255,255,0.3); margin-bottom:2px;">
-                🎯 ${currentItem.name} (Gerçek Yer)
-              </span>
-              <div style="position:relative; display:flex; align-items:center; justify-content:center;">
-                <span style="position:absolute; width:32px; height:32px; border-radius:9999px; background:${targetColor}; opacity:0.35;" class="animate-ping"></span>
-                <span style="width:16px; height:16px; border-radius:9999px; background:${targetColor}; border:2px solid white; box-shadow:0 2px 6px rgba(0,0,0,0.4);"></span>
+            <div style="position:relative; display:flex; flex-direction:column; align-items:center; cursor:default; user-select:none; z-index:30;">
+              <div style="display:inline-flex; align-items:center; gap:5px; padding:3px 10px; font-size:11px; font-weight:800; border-radius:9999px; color:#ffffff; background:linear-gradient(135deg, #059669, #10b981); border:1.5px solid #6ee7b7; box-shadow:0 3px 10px rgba(5,150,105,0.45); white-space:nowrap; margin-bottom:3px; text-shadow:0 1px 2px rgba(0,0,0,0.3);">
+                <span style="font-size:13px; line-height:1;">🎯</span>
+                <span>Doğru Konum: <strong>${currentItem.name}</strong></span>
+              </div>
+              <div style="position:relative; width:36px; height:42px; display:flex; align-items:center; justify-content:center;">
+                <span style="position:absolute; top:1px; left:50%; transform:translateX(-50%); width:32px; height:32px; border-radius:9999px; background:rgba(16,185,129,0.5);" class="animate-ping"></span>
+                <svg width="36" height="42" viewBox="0 0 36 42" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));">
+                  <path d="M18 26V40" stroke="#047857" stroke-width="3" stroke-linecap="round"/>
+                  <circle cx="18" cy="40.5" r="1.5" fill="#065f46"/>
+                  <circle cx="18" cy="17" r="15.5" fill="#10b981" stroke="#ffffff" stroke-width="2.5"/>
+                  <circle cx="18" cy="17" r="10.5" fill="#ffffff"/>
+                  <circle cx="18" cy="17" r="7" fill="#059669"/>
+                  <circle cx="18" cy="17" r="3.8" fill="#fbbf24" stroke="#ffffff" stroke-width="1"/>
+                </svg>
               </div>
             </div>
           `,
-          iconSize: [160, 50],
-          iconAnchor: [80, 42],
+          iconSize: [220, 70],
+          iconAnchor: [110, 70],
         });
 
         L.marker([targetLat, targetLng], { icon: targetIcon }).addTo(
@@ -257,12 +280,13 @@ export default function GeoMap({
         const distanceBadgeIcon = L.divIcon({
           className: "distance-badge-icon",
           html: `
-            <div style="padding:4px 10px; font-size:11px; font-weight:bold; color:#0f172a; background:rgba(255,255,255,0.96); border-radius:12px; border:1px solid #cbd5e1; box-shadow:0 4px 8px rgba(0,0,0,0.2); white-space:nowrap; text-align:center;">
-              Sapma: <strong style="color:${targetColor}; font-size:12px;">${distanceKm} km</strong>
+            <div style="display:inline-flex; align-items:center; gap:5px; padding:3px 10px; font-size:11px; font-weight:700; color:#0f172a; background:rgba(255,255,255,0.96); backdrop-filter:blur(6px); border-radius:9999px; border:1.5px solid #cbd5e1; box-shadow:0 4px 10px rgba(0,0,0,0.22); white-space:nowrap; text-align:center;">
+              <span style="color:#64748b; font-size:10px; text-transform:uppercase; letter-spacing:0.5px;">Sapma:</span>
+              <strong style="color:${targetColor}; font-size:12px; font-weight:800;">${distanceKm} km</strong>
             </div>
           `,
-          iconSize: [120, 30],
-          iconAnchor: [60, 15],
+          iconSize: [130, 30],
+          iconAnchor: [65, 15],
         });
 
         L.marker([midLat, midLng], { icon: distanceBadgeIcon }).addTo(
@@ -531,16 +555,6 @@ export default function GeoMap({
           )}
         </div>
       </div>
-
-      {/* Körleme Modunda Bilgilendirme Rozeti */}
-      {mode === "blind" && allowGuess && (
-        <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-20 pointer-events-none">
-          <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900/95 backdrop-blur-xl border border-cyan-500/40 text-cyan-300 text-xs font-medium shadow-xl">
-            <MapPin size={14} className="text-cyan-400 animate-bounce" />
-            <span>Türkiye haritasında tahmin ettiğin yere doğrudan tıkla!</span>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

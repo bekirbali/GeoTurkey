@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { GeoItem, QuizMode } from "@/types/geography";
-import { ChevronRight, CheckCircle2, XCircle, Lightbulb, Award, Heart, Star, ChevronUp, ChevronDown } from "lucide-react";
+import { ChevronRight, CheckCircle2, XCircle, Lightbulb, Award, Heart, Star, ChevronUp, ChevronDown, SlidersHorizontal } from "lucide-react";
 
 interface QuestionCardProps {
   item: GeoItem;
@@ -24,6 +24,7 @@ interface QuestionCardProps {
   selectedOptionId?: string | null;
   isFavorite?: boolean;
   onToggleFavorite?: () => void;
+  onOpenSettings?: () => void;
 }
 
 export default function QuestionCard({
@@ -40,14 +41,14 @@ export default function QuestionCard({
   selectedOptionId,
   isFavorite = false,
   onToggleFavorite,
+  onOpenSettings,
 }: QuestionCardProps) {
   const [showHint, setShowHint] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
 
-  // Yeni soru geldiğinde ipucunu ve küçültmeyi sıfırla
+  // Yeni soru geldiğinde sadece ipucunu sıfırla (Kullanıcı haritayı rahat görmek için küçülttüyse seçimini koru)
   React.useEffect(() => {
     setShowHint(false);
-    setIsMinimized(false);
   }, [item.id]);
 
   const remainingAttempts = Math.max(0, maxAttempts - currentAttempt + 1);
@@ -116,6 +117,17 @@ export default function QuestionCard({
             </button>
           )}
 
+          {/* Zorluk Ayarı Butonu (Küçültülmüş Görünüm) */}
+          {onOpenSettings && (
+            <button
+              onClick={onOpenSettings}
+              className="text-slate-400 hover:text-cyan-300 p-1 hover:bg-slate-800 rounded-lg text-xs transition-colors"
+              title="Zorluk & Katman Ayarları"
+            >
+              <SlidersHorizontal size={14} />
+            </button>
+          )}
+
           <button
             onClick={() => setIsMinimized(false)}
             className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
@@ -129,9 +141,9 @@ export default function QuestionCard({
   }
 
   return (
-    <div className="w-full max-w-md bg-slate-900/95 backdrop-blur-2xl border border-slate-700/80 rounded-2xl sm:rounded-3xl p-3 sm:p-5 shadow-2xl transition-all">
+    <div className="w-full max-w-md bg-slate-900/95 backdrop-blur-2xl border border-slate-700/80 rounded-2xl sm:rounded-3xl p-2.5 sm:p-5 shadow-2xl transition-all">
       {/* Üst Rozetler, Favori Butonu, Küçültme ve Kalan Hak Göstergesi */}
-      <div className="flex items-center justify-between gap-2 mb-2 sm:mb-3">
+      <div className="flex items-center justify-between gap-2 mb-1.5 sm:mb-3">
         <div className="flex items-center gap-1.5 sm:gap-2">
           <span className="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-semibold bg-cyan-500/15 text-cyan-400 border border-cyan-500/30">
             {item.subCategoryTitle}
@@ -183,6 +195,18 @@ export default function QuestionCard({
             </button>
           )}
 
+          {/* Zorluk Ayarı Butonu (Genişletilmiş Görünüm) */}
+          {onOpenSettings && (
+            <button
+              onClick={onOpenSettings}
+              className="flex items-center gap-1 px-2 py-1 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/60 text-slate-300 hover:text-cyan-300 transition-all text-[11px] font-semibold"
+              title="Harita Zorluk ve Katman Ayarları"
+            >
+              <SlidersHorizontal size={12} className="text-cyan-400" />
+              <span className="hidden sm:inline">Zorluk</span>
+            </button>
+          )}
+
           {/* Küçültme Butonu (Cevap öncesi ve sonrası haritayı engelsiz görmek için) */}
           <button
             onClick={() => setIsMinimized(true)}
@@ -195,7 +219,7 @@ export default function QuestionCard({
       </div>
 
       {/* Soru Başlığı */}
-      <div className="mb-2 sm:mb-3">
+      <div className="mb-1.5 sm:mb-3">
         <span className="text-[10px] sm:text-xs uppercase tracking-wider text-slate-400 font-semibold block">
           {mode === "blind"
             ? "Körleme Tahmin"
@@ -203,7 +227,7 @@ export default function QuestionCard({
             ? "Ters Mod (Konumdan İsim)"
             : "Hedefi Bul"}
         </span>
-        <h2 className="text-lg sm:text-2xl font-black text-white tracking-tight flex items-center gap-2 mt-0.5">
+        <h2 className="text-base sm:text-2xl font-black text-white tracking-tight flex items-center gap-2 mt-0.5">
           {mode === "reverse" ? "Haritada Vurgulanan Yer?" : item.name}
         </h2>
         <p className="text-xs text-slate-400 mt-0.5 hidden sm:block">

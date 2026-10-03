@@ -30,6 +30,8 @@ interface VectorMapProps {
   currentAttempt: number;
   maxAttempts: number;
   wrongItemIds: string[];
+  isSettingsOpen?: boolean;
+  onToggleSettings?: (open: boolean) => void;
 }
 
 // 100% Ücretsiz, API Key Gerektirmeyen Vektör Harita Stilleri
@@ -79,10 +81,13 @@ export default function VectorMap({
   currentAttempt,
   maxAttempts,
   wrongItemIds,
+  isSettingsOpen,
+  onToggleSettings,
 }: VectorMapProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<MapLibreMap | null>(null);
   const activeMarkersRef = useRef<maplibregl.Marker[]>([]);
+  const blindMarkersRef = useRef<maplibregl.Marker[]>([]);
   const linePopupRef = useRef<maplibregl.Popup | null>(null);
 
   // Ses Efekti Durumu
@@ -97,7 +102,12 @@ export default function VectorMap({
     stylePreset: "positron",
   });
 
-  const [showSettingsModal, setShowSettingsModal] = useState<boolean>(false);
+  const [internalShowSettings, setInternalShowSettings] = useState<boolean>(false);
+  const showSettingsModal = isSettingsOpen !== undefined ? isSettingsOpen : internalShowSettings;
+  const setShowSettingsModal = (open: boolean) => {
+    if (onToggleSettings) onToggleSettings(open);
+    else setInternalShowSettings(open);
+  };
 
   // Katman Görünürlüklerini Uygulayan Yardımcı Fonksiyon
   const applyLayerVisibility = useCallback((map: MapLibreMap, currentSettings: MapLayerSettings) => {
@@ -245,6 +255,8 @@ export default function VectorMap({
     return () => {
       clearTimeout(t);
       window.removeEventListener("resize", handleResize);
+      blindMarkersRef.current.forEach((m) => m.remove());
+      blindMarkersRef.current = [];
       map.remove();
       mapInstanceRef.current = null;
     };
@@ -320,53 +332,76 @@ export default function VectorMap({
         else soundEffects.playMiss();
       }
 
-      // 1. Önceki markerları temizle
-      activeMarkersRef.current.forEach((m) => m.remove());
-      activeMarkersRef.current = [];
+      // 1. Önceki körleme markerlarını temizle
+      blindMarkersRef.current.forEach((m) => m.remove());
+      blindMarkersRef.current = [];
 
       if (linePopupRef.current) {
         linePopupRef.current.remove();
         linePopupRef.current = null;
       }
 
-      // 2. Kullanıcı Tıklama Noktası Markeri
+      // 2. Kullanıcı Tıklama Noktası Markeri (Mavi Klasik İğne / Pin + Nişangah)
       const userEl = document.createElement("div");
       userEl.innerHTML = `
-        <div style="position:relative; display:flex; flex-direction:column; align-items:center;">
-          <span style="padding:2px 7px; font-size:10px; font-weight:bold; border-radius:6px; color:white; background:#2563eb; box-shadow:0 2px 5px rgba(0,0,0,0.3); white-space:nowrap; margin-bottom:2px;">
-            Tahminin
-          </span>
-          <div style="position:relative; display:flex; align-items:center; justify-content:center;">
-            <span style="position:absolute; width:28px; height:28px; border-radius:9999px; background:rgba(37,99,235,0.35);" class="animate-ping"></span>
-            <span style="position:relative; width:14px; height:14px; border-radius:9999px; background:#2563eb; border:2px solid white; box-shadow:0 2px 6px rgba(0,0,0,0.4);"></span>
+        <div style="position:relative; display:flex; flex-direction:column; align-items:center; cursor:default; user-select:none; z-index:20;">
+          <div style="display:inline-flex; align-items:center; gap:4px; padding:2.5px 8px; font-size:11px; font-weight:700; border-radius:9999px; color:#ffffff; background:linear-gradient(135deg, #1d4ed8, #2563eb); border:1.5px solid #93c5fd; box-shadow:0 3px 8px rgba(37,99,235,0.45); white-space:nowrap; margin-bottom:3px; text-shadow:0 1px 2px rgba(0,0,0,0.3);">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="22" y1="12" x2="18" y2="12"/>
+              <line x1="6" y1="12" x2="2" y2="12"/>
+              <line x1="12" y1="6" x2="12" y2="2"/>
+              <line x1="12" y1="22" x2="12" y2="18"/>
+            </svg>
+            <span>Senin Tahminin</span>
+          </div>
+          <div style="position:relative; width:30px; height:38px; display:flex; align-items:center; justify-content:center;">
+            <span style="position:absolute; bottom:-4px; left:50%; transform:translateX(-50%); width:20px; height:20px; border-radius:9999px; background:rgba(37,99,235,0.45);" class="animate-ping"></span>
+            <svg width="30" height="38" viewBox="0 0 30 38" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 4px 6px rgba(0,0,0,0.45));">
+              <path d="M15 1C7.268 1 1 7.268 1 15C1 25.5 15 37 15 37C15 37 29 25.5 29 15C29 7.268 22.732 1 15 1Z" fill="#2563eb" stroke="#ffffff" stroke-width="2"/>
+              <circle cx="15" cy="15" r="5.5" fill="#ffffff"/>
+              <circle cx="15" cy="15" r="3" fill="#1d4ed8"/>
+              <line x1="15" y1="5.5" x2="15" y2="8" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="15" y1="22" x2="15" y2="24.5" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="5.5" y1="15" x2="8" y2="15" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="22" y1="15" x2="24.5" y2="15" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
           </div>
         </div>
       `;
       const userMarker = new maplibregl.Marker({ element: userEl, anchor: "bottom" })
         .setLngLat([clickedLng, clickedLat])
         .addTo(map);
-      activeMarkersRef.current.push(userMarker);
+      blindMarkersRef.current.push(userMarker);
 
-      // 3. Gerçek Orijinal Hedef Noktası Markeri
+      // 3. Gerçek Orijinal Hedef Noktası Markeri (Zümrüt Yeşili Hedef Tahtası & Radar Rozeti)
       const targetColor =
         evaluation.score >= 600 ? "#10b981" : evaluation.score >= 300 ? "#f59e0b" : "#ef4444";
 
       const targetEl = document.createElement("div");
       targetEl.innerHTML = `
-        <div style="position:relative; display:flex; flex-direction:column; align-items:center;">
-          <span style="padding:3px 9px; font-size:11px; font-weight:800; border-radius:8px; color:white; background:${targetColor}; box-shadow:0 4px 8px rgba(0,0,0,0.4); white-space:nowrap; border:1px solid rgba(255,255,255,0.3); margin-bottom:2px;">
-            🎯 ${currentItem.name} (Gerçek Yer)
-          </span>
-          <div style="position:relative; display:flex; align-items:center; justify-content:center;">
-            <span style="position:absolute; width:34px; height:34px; border-radius:9999px; background:${targetColor}; opacity:0.35;" class="animate-ping"></span>
-            <span style="width:16px; height:16px; border-radius:9999px; background:${targetColor}; border:2px solid white; box-shadow:0 2px 6px rgba(0,0,0,0.4);"></span>
+        <div style="position:relative; display:flex; flex-direction:column; align-items:center; cursor:default; user-select:none; z-index:30;">
+          <div style="display:inline-flex; align-items:center; gap:5px; padding:3px 10px; font-size:11px; font-weight:800; border-radius:9999px; color:#ffffff; background:linear-gradient(135deg, #059669, #10b981); border:1.5px solid #6ee7b7; box-shadow:0 3px 10px rgba(5,150,105,0.45); white-space:nowrap; margin-bottom:3px; text-shadow:0 1px 2px rgba(0,0,0,0.3);">
+            <span style="font-size:13px; line-height:1;">🎯</span>
+            <span>Doğru Konum: <strong>${currentItem.name}</strong></span>
+          </div>
+          <div style="position:relative; width:36px; height:42px; display:flex; align-items:center; justify-content:center;">
+            <span style="position:absolute; top:1px; left:50%; transform:translateX(-50%); width:32px; height:32px; border-radius:9999px; background:rgba(16,185,129,0.5);" class="animate-ping"></span>
+            <svg width="36" height="42" viewBox="0 0 36 42" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));">
+              <path d="M18 26V40" stroke="#047857" stroke-width="3" stroke-linecap="round"/>
+              <circle cx="18" cy="40.5" r="1.5" fill="#065f46"/>
+              <circle cx="18" cy="17" r="15.5" fill="#10b981" stroke="#ffffff" stroke-width="2.5"/>
+              <circle cx="18" cy="17" r="10.5" fill="#ffffff"/>
+              <circle cx="18" cy="17" r="7" fill="#059669"/>
+              <circle cx="18" cy="17" r="3.8" fill="#fbbf24" stroke="#ffffff" stroke-width="1"/>
+            </svg>
           </div>
         </div>
       `;
       const targetMarker = new maplibregl.Marker({ element: targetEl, anchor: "bottom" })
         .setLngLat([targetLng, targetLat])
         .addTo(map);
-      activeMarkersRef.current.push(targetMarker);
+      blindMarkersRef.current.push(targetMarker);
 
       // 4. Bağlantı Çizgisi (GeoJSON Source Güncellemesi)
       const lineSource = map.getSource("guess-line") as maplibregl.GeoJSONSource;
@@ -396,15 +431,17 @@ export default function VectorMap({
       const midLat = (clickedLat + targetLat) / 2;
 
       const popup = new maplibregl.Popup({
+        className: "guess-distance-popup",
         closeButton: false,
         closeOnClick: false,
         anchor: "bottom",
-        offset: [0, -5],
+        offset: [0, -6],
       })
         .setLngLat([midLng, midLat])
         .setHTML(
-          `<div style="padding:4px 10px; font-size:11px; font-weight:bold; color:#0f172a; background:rgba(255,255,255,0.96); border-radius:12px; border:1px solid #cbd5e1; box-shadow:0 4px 8px rgba(0,0,0,0.2); white-space:nowrap; text-align:center;">
-             Sapma: <strong style="color:${targetColor}; font-size:12px;">${distanceKm} km</strong>
+          `<div style="display:inline-flex; align-items:center; gap:5px; padding:3px 10px; font-size:11px; font-weight:700; color:#0f172a; background:rgba(255,255,255,0.96); backdrop-filter:blur(6px); border-radius:9999px; border:1.5px solid #cbd5e1; box-shadow:0 4px 10px rgba(0,0,0,0.22); white-space:nowrap; text-align:center;">
+             <span style="color:#64748b; font-size:10px; text-transform:uppercase; letter-spacing:0.5px;">Sapma:</span>
+             <strong style="color:${targetColor}; font-size:12px; font-weight:800;">${distanceKm} km</strong>
            </div>`
         )
         .addTo(map);
@@ -442,7 +479,7 @@ export default function VectorMap({
     };
   }, [handleMapClick]);
 
-  // Yeni Soruya Geçildiğinde Çizgileri Temizle
+  // Yeni Soruya Geçildiğinde Çizgileri ve Körleme Markerlarını Temizle
   useEffect(() => {
     const map = mapInstanceRef.current;
     if (!map) return;
@@ -459,6 +496,8 @@ export default function VectorMap({
         linePopupRef.current.remove();
         linePopupRef.current = null;
       }
+      blindMarkersRef.current.forEach((m) => m.remove());
+      blindMarkersRef.current = [];
     }
   }, [allowGuess, mode]);
 
@@ -467,9 +506,22 @@ export default function VectorMap({
     const map = mapInstanceRef.current;
     if (!map) return;
 
-    // Önceki markerları temizle
+    // Önceki tüm aktif markerları (Keşfet, İşaretçi, Ters) DAİMA haritadan temizle
     activeMarkersRef.current.forEach((m) => m.remove());
     activeMarkersRef.current = [];
+
+    // Körleme modundaysak harita tamamen temiz kalmalı (sadece tıklanınca 2 marker eklenir)
+    if (mode === "blind") {
+      if (allowGuess) {
+        blindMarkersRef.current.forEach((m) => m.remove());
+        blindMarkersRef.current = [];
+      }
+      return;
+    }
+
+    // Körleme modundan başka bir moda çıkıldıysa körleme markerlarını temizle
+    blindMarkersRef.current.forEach((m) => m.remove());
+    blindMarkersRef.current = [];
 
     if (mode === "study") {
       // Keşfet & Çalış Modu
@@ -660,53 +712,72 @@ export default function VectorMap({
         className="w-full h-full flex-1 z-0"
       />
 
-      {/* Üst Sağ Harita Kontrolleri (Zorluk/Katman Ayarları & Ses) */}
-      <div className="absolute top-4 right-4 z-20 flex items-center gap-2">
-        <button
-          onClick={() => setSoundEnabled(!soundEnabled)}
-          className={`p-2.5 rounded-2xl backdrop-blur-xl border transition-all duration-200 shadow-lg ${
-            soundEnabled
-              ? "bg-slate-900/90 text-emerald-400 border-emerald-500/30 hover:bg-slate-800"
-              : "bg-slate-900/90 text-slate-400 border-slate-700/50 hover:bg-slate-800"
-          }`}
-          title={soundEnabled ? "Sesi Kapat" : "Sesi Aç"}
-        >
-          {soundEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}
-        </button>
-
-        {/* Katman & Zorluk Kontrol Butonu */}
-        <button
-          onClick={() => setShowSettingsModal(!showSettingsModal)}
-          className="flex items-center gap-2 px-3 py-2.5 rounded-2xl bg-slate-900/90 backdrop-blur-xl border border-slate-700/60 text-slate-200 text-xs font-semibold shadow-lg hover:bg-slate-800 transition-all"
-        >
-          <SlidersHorizontal size={15} className="text-cyan-400" />
-          <span>Katman & Zorluk</span>
-          <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-cyan-500/20 text-cyan-300 uppercase">
-            {settings.difficulty === "easy"
-              ? "Kolay"
-              : settings.difficulty === "medium"
-              ? "Orta"
-              : settings.difficulty === "hard"
-              ? "Zor"
-              : "Özel"}
-          </span>
-        </button>
-      </div>
-
-      {/* Zorluk & Vektör Katman Ayarları Modalı */}
-      {showSettingsModal && (
-        <div className="absolute top-16 right-4 w-72 rounded-3xl bg-slate-900/95 backdrop-blur-2xl border border-slate-700/90 p-4 shadow-2xl z-30 animate-in fade-in zoom-in-95 duration-150">
-          <div className="flex items-center justify-between pb-2 mb-3 border-b border-slate-800">
-            <span className="text-xs font-bold text-white flex items-center gap-1.5">
-              <Shield size={14} className="text-cyan-400" /> Zorluk Seviyesi
+      {/* Harita Kontrolleri (Zorluk/Katman Ayarları) - Sadece Keşfet Modunda Gösterilir */}
+      {mode === "study" && (
+        <div className="absolute top-4 right-4 z-20 flex items-center gap-2">
+          {/* Katman & Zorluk Kontrol Butonu */}
+          <button
+            onClick={() => setShowSettingsModal(!showSettingsModal)}
+            className="flex items-center gap-2 px-3 py-2.5 rounded-2xl bg-slate-900/90 backdrop-blur-xl border border-slate-700/60 text-slate-200 text-xs font-semibold shadow-lg hover:bg-slate-800 transition-all"
+          >
+            <SlidersHorizontal size={15} className="text-cyan-400" />
+            <span>Katman & Zorluk</span>
+            <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-cyan-500/20 text-cyan-300 uppercase">
+              {settings.difficulty === "easy"
+                ? "Kolay"
+                : settings.difficulty === "medium"
+                ? "Orta"
+                : settings.difficulty === "hard"
+                ? "Zor"
+                : "Özel"}
             </span>
-            <button
-              onClick={() => setShowSettingsModal(false)}
-              className="text-xs text-slate-400 hover:text-white"
-            >
-              ✕
-            </button>
-          </div>
+          </button>
+        </div>
+      )}
+
+      {/* Zorluk & Vektör Katman Ayarları Modalı (Mobilde ekran ortasında, masaüstünde üst sağda) */}
+      {showSettingsModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/75 backdrop-blur-sm sm:absolute sm:inset-auto sm:top-16 sm:right-4 sm:p-0 sm:bg-transparent animate-in fade-in duration-150">
+          {/* Mobilde dışarı tıklayınca kapatma overlay'i */}
+          <div
+            className="fixed inset-0 sm:hidden -z-10"
+            onClick={() => setShowSettingsModal(false)}
+          />
+          <div className="w-full max-w-xs sm:w-72 rounded-3xl bg-slate-900/98 backdrop-blur-2xl border border-slate-700/90 p-4 shadow-2xl animate-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between pb-2 mb-3 border-b border-slate-800">
+              <span className="text-xs font-bold text-white flex items-center gap-1.5">
+                <SlidersHorizontal size={14} className="text-cyan-400" /> Harita & Oyun Ayarları
+              </span>
+              <button
+                onClick={() => setShowSettingsModal(false)}
+                className="w-6 h-6 rounded-lg bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-xs text-slate-400 hover:text-white transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Ses Efektleri Aç / Kapat */}
+            <div className="flex items-center justify-between p-2 rounded-xl bg-slate-800/50 border border-slate-800 mb-3 text-xs">
+              <div className="flex items-center gap-2 text-slate-200">
+                {soundEnabled ? (
+                  <Volume2 size={16} className="text-emerald-400" />
+                ) : (
+                  <VolumeX size={16} className="text-slate-400" />
+                )}
+                <span className="font-medium">Ses Efektleri</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSoundEnabled(!soundEnabled)}
+                className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all ${
+                  soundEnabled
+                    ? "bg-emerald-600 text-white shadow-sm shadow-emerald-500/30"
+                    : "bg-slate-700/80 text-slate-400 hover:bg-slate-700"
+                }`}
+              >
+                {soundEnabled ? "Açık" : "Kapalı"}
+              </button>
+            </div>
 
           {/* Zorluk Hazır Ayarları (Presets) */}
           <div className="grid grid-cols-3 gap-1.5 mb-4">
@@ -822,16 +893,7 @@ export default function VectorMap({
             </div>
           </div>
         </div>
-      )}
-
-      {/* Körleme Modunda Bilgilendirme Rozeti */}
-      {mode === "blind" && allowGuess && (
-        <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-20 pointer-events-none">
-          <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900/95 backdrop-blur-xl border border-cyan-500/40 text-cyan-300 text-xs font-medium shadow-xl">
-            <MapPin size={14} className="text-cyan-400 animate-bounce" />
-            <span>Türkiye haritasında tahmin ettiğin yere doğrudan tıkla!</span>
-          </div>
-        </div>
+      </div>
       )}
     </div>
   );
